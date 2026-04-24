@@ -1,22 +1,23 @@
 import requests
+import sys
 
-domain = input("Please , enter the domain you want to enumrate : ")
+domain = input("Enter the domain to enumerate: ")
+wordlist_path = input("Enter the wordlist path: ")
 
-wordlist = open("wordlist2.txt", "r")
+try:
+    with open(wordlist_path, "r") as wordlist:
+        sub_domains = wordlist.read().splitlines()
+except FileNotFoundError:
+    print(f"Error: File '{wordlist_path}' not found.")
+    sys.exit(1)
 
-sub_domains = wordlist.read()
-sub_domains = list(sub_domains.split("\n"))
-
-i = 0
-
-while i < len(sub_domains):
-    sub_domain = sub_domains[i]
-    sub_domain = f"http://{sub_domain}.{domain}"
+for sub_domain in sub_domains:
+    if not sub_domain.strip():
+        continue
+    url = f"http://{sub_domain.strip()}.{domain}"
     try:
-        requests.get(sub_domain)
+        requests.get(url, timeout=3)
     except requests.ConnectionError:
         pass
     else:
-        print(f"Connected to : {sub_domain}")
-    i += 1
-wordlist.close()
+        print(f"Connected to: {url}")
